@@ -10,7 +10,26 @@ import UIKit
 
 class ItemStore {
     
+    let itemArchiveUrl: URL = {
+        let documentDirectories = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        let documentDirectory = documentDirectories.first!
+        return documentDirectory.appendingPathComponent("items.archive")
+    }()
+    
     var allItems = [Item]()
+    
+    init() {
+        do {
+            let data = try Data(contentsOf: itemArchiveUrl)
+            if let archivedItems = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? [Item] {
+                allItems = archivedItems
+            } else {
+                print("Unable to find archive.")
+            }
+        } catch {
+            print("Couldn't read file.")
+        }
+    }
     
     func removeitem(_ item: Item) {
         if let index = allItems.firstIndex(of: item) {
@@ -34,5 +53,16 @@ class ItemStore {
         allItems.append(newItem)
         
         return newItem
+    }
+    
+    func saveChanges() -> Bool {
+        do {
+            let data = try NSKeyedArchiver.archivedData(withRootObject: allItems, requiringSecureCoding: false)
+            try data.write(to: itemArchiveUrl)
+        } catch {
+            print("Couldn't write to file.")
+            return false
+        }
+        return true
     }
 }

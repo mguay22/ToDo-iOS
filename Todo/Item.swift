@@ -8,7 +8,7 @@
 
 import UIKit
 
-class Item : NSObject {
+class Item : NSObject, NSCoding {
     var name: String
     var descriptionText: String
     var id: Int
@@ -21,5 +21,22 @@ class Item : NSObject {
         self.dateCreated = Date()
         
         super.init()
+    }
+    
+    required init(coder aDecoder: NSCoder) {
+        name = aDecoder.decodeObject(forKey: "name") as! String
+        dateCreated = aDecoder.decodeObject(forKey: "dateCreated") as! Date
+        id = aDecoder.decodeInteger(forKey: "id") as! Int
+        descriptionText = aDecoder.decodeObject(forKey: "descriptionText") as! String
+                
+        super.init()
+    }
+    
+    func encode(with aCoder: NSCoder) {
+        aCoder.encode(name, forKey: "name")
+        aCoder.encode(dateCreated, forKey: "dateCreated")
+        aCoder.encode(descriptionText, forKey: "descriptionText")
+        print("Here is the id", id)
+        aCoder.encode(id, forKey: "id")
     }
 }
